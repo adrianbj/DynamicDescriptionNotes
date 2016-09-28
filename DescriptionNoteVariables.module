@@ -1,0 +1,82 @@
+<?php
+
+/**
+* Lets you use the PW page variable in field descriptions and notes
+*
+* Specifiy fields/properties of the page, eg:
+* [page.parent.url]
+* [page.title]
+* [page.template.label]
+*
+* You can also define a str_replace to be performed on the returned value, eg:
+* [page.name.(-|_)]
+* which will return the page name with the dashes replaced with underscores
+*/
+
+class DescriptionNoteVariables extends WireData implements Module {
+
+    public static function getModuleInfo() {
+        return array(
+            'title' => 'Description & Note Variables',
+            'version' => 3,
+            'summary' => 'Lets you use page and other PW variables in field Description and Notes text.',
+            'autoload' => "template=admin",
+            );
+    }
+
+    public function init() {
+        $this->addHookAfter('InputfieldWrapper::render', $this, 'replaceVariables');
+    }
+
+    public function replaceVariables(HookEvent $event) {
+
+        $page = wire('page');
+        if($page->process !== 'ProcessPageEdit') return;
+
+        $process = $this->wire('process');
+        if($process && $process->className() == 'ProcessPageEdit') $p = $process->getPage();
+
+        // find variables identified by: page.properties
+        if(strpos($event->return, '[page.') !== false) {
+
+            //get content only from p tags with decription or notes tag
+            preg_match_all('/<p class=(\"|\')(description|notes)(\"|\')>(.*?)<\/p>/', $event->return, $decriptionNotes);
+
+            foreach($decriptionNotes[4] as $match) {
+
+                if(strpos($match, '[page.') === false) continue;
+                preg_match_all('/\[page([^\]]*)\]/', $match, $matches);
+                $i=0;
+                $properties = array();
+
+                foreach(explode('.', $matches[1][0]) as $property) {
+                    // if property is a defined str_replacement in parentheses set $strReplace
+                    if(strpos($property, '(') !== false) {
+                        preg_match_all("/\((.*?)\)/", $property, $strReplace);
+                    }
+                    //else it's a real property
+                    elseif($i>0) {
+                        $strReplace = null;
+                        $properties[] = $property;
+                    }
+                    $i++;
+                }
+
+                // get the value of the defined PW page properties
+                $replacement = eval('return $p->' . implode('->', $properties) . ';');
+
+                // defined $strReplace changes to the value of the PW page property
+                if(isset($strReplace)) {
+                    $parts = explode('|', $strReplace[1][0]);
+                    $replacement = str_replace($parts[0], $parts[1], $replacement);
+                }
+
+                $event->return = str_replace($matches[0][0], $replacement, $event->return);
+
+            }
+        }
+        $event->return = $event->return;
+
+    }
+
+}
