@@ -39,7 +39,7 @@ class DescriptionNoteVariables extends WireData implements Module {
         // find variables identified by: page.properties
         if(strpos($event->return, '[page.') !== false) {
 
-            //get content only from p tags with decription or notes tag
+            //get content only from p tags with decription or notes class
             preg_match_all('/<p class=(\"|\')(description|notes)(\"|\')>(.*?)<\/p>/', $event->return, $decriptionNotes);
 
             foreach($decriptionNotes[4] as $match) {
