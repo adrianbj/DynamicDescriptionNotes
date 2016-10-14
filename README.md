@@ -16,7 +16,7 @@ You can also use hanna codes within your description and notes fields - big than
 
 ####Support forum:
 
-https://processwire.com/talk/topic/14439-description-note-variables/
+https://processwire.com/talk/topic/14439-dynamic-description-notes/
 
 
 ## License
