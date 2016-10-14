@@ -11,6 +11,9 @@
 * You can also define a str_replace to be performed on the returned value, eg:
 * [page.name.(-|_)]
 * which will return the page name with the dashes replaced with underscores
+*
+* You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
+*
 */
 
 class DescriptionNoteVariables extends WireData implements Module {
@@ -18,65 +21,84 @@ class DescriptionNoteVariables extends WireData implements Module {
     public static function getModuleInfo() {
         return array(
             'title' => 'Description & Note Variables',
-            'version' => 3,
+            'version' => 4,
             'summary' => 'Lets you use page and other PW variables in field Description and Notes text.',
             'autoload' => "template=admin",
             );
     }
 
+    private $hanna;
+    private $p;
+
     public function init() {
-        $this->addHookAfter('InputfieldWrapper::render', $this, 'replaceVariables');
+        $this->addHookBefore('Inputfield::render', $this, 'replaceVariables');
     }
 
-    public function replaceVariables(HookEvent $event) {
-
-        $page = wire('page');
-        if($page->process !== 'ProcessPageEdit') return;
+    protected function replaceVariables(HookEvent $event) {
 
         $process = $this->wire('process');
-        if($process && $process->className() == 'ProcessPageEdit') $p = $process->getPage();
+        if($process->className() !== 'ProcessPageEdit') return;
+        if(!$this->p) $this->p = $process->getPage();
 
-        // find variables identified by: page.properties
-        if(strpos($event->return, '[page.') !== false) {
+        $inputfield = $event->object;
+        $field = $this->fields->get($event->object->name);
+        $description = $inputfield->description;
+        $notes = $inputfield->notes;
+        if($description == '' && $notes == '') return;
 
-            //get content only from p tags with decription or notes class
-            preg_match_all('/<p class=(\"|\')(description|notes)(\"|\')>(.*?)<\/p>/', $event->return, $decriptionNotes);
+        if($description !== '') $inputfield->description = $this->allReplacements($description, $this->p, $field);
+        if($notes !== '') $inputfield->notes  = $this->allReplacements($notes, $this->p, $field);
 
-            foreach($decriptionNotes[4] as $match) {
+    }
 
-                if(strpos($match, '[page.') === false) continue;
-                preg_match_all('/\[page([^\]]*)\]/', $match, $matches);
-                $i=0;
-                $properties = array();
+    private function allReplacements($text, $p, $field) {
+        $text = $this->variablesReplace($text, $p);
+        if($this->modules->isInstalled('TextformatterHannaCode')) $text = $this->hannaFormat($text, $p, $field);
+        return $text;
+    }
 
-                foreach(explode('.', $matches[1][0]) as $property) {
-                    // if property is a defined str_replacement in parentheses set $strReplace
-                    if(strpos($property, '(') !== false) {
-                        preg_match_all("/\((.*?)\)/", $property, $strReplace);
-                    }
-                    //else it's a real property
-                    elseif($i>0) {
-                        $strReplace = null;
-                        $properties[] = $property;
-                    }
-                    $i++;
+    private function variablesReplace($text, $p) {
+
+        if(strpos($text, '[page.') === false) return $text;
+
+        preg_match_all('/\[page([^\]]*)\]/', $text, $matches);
+
+        foreach($matches[1] as $match) {
+            $i=0;
+            $properties = array();            
+            foreach(explode('.', $match) as $property) {
+                // if property is a defined str_replacement in parentheses set $strReplace
+                if(strpos($property, '(') !== false) {
+                    preg_match_all("/\((.*?)\)/", $property, $strReplace);
                 }
-
-                // get the value of the defined PW page properties
-                $replacement = eval('return $p->' . implode('->', $properties) . ';');
-
-                // defined $strReplace changes to the value of the PW page property
-                if(isset($strReplace)) {
-                    $parts = explode('|', $strReplace[1][0]);
-                    $replacement = str_replace($parts[0], $parts[1], $replacement);
+                //else it's a real property
+                elseif($i>0) {
+                    $strReplace = null;
+                    $properties[] = $property;
                 }
-
-                $event->return = str_replace($matches[0][0], $replacement, $event->return);
-
+                $i++;
             }
-        }
-        $event->return = $event->return;
+            // get the value of the defined PW page properties
+            $replacement = eval('return $p->' . implode('->', $properties) . ';');
 
+            // defined $strReplace changes to the value of the PW page property
+            if(isset($strReplace)) {
+                $parts = explode('|', $strReplace[1][0]);
+                $replacement = str_replace($parts[0], $parts[1], $replacement);
+            }
+            $text = str_replace('[page'.$match.']', $replacement, $text);
+        }
+        return $text;
+    }
+
+    private function hannaFormat($text, $p, $field) {
+        if(!$this->hanna) $this->hanna = $this->modules->get('TextformatterHannaCode'); 
+        if(strpos($text, $this->hanna->openTag) !== false && strpos($text, $this->hanna->closeTag) !== false) {
+            return $this->hanna->render($text, $p, $field);
+        }
+        else {
+            return $text;
+        }
     }
 
 }
