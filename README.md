@@ -1,7 +1,7 @@
-DescriptionNoteVariables
+DynamicDescriptionNotes
 ================
 
-ProcessWire for using PW variables in Description and Note fields.
+ProcessWire module for using PW variables and Hanna codes in Description and Note fields.
 
 Specifiy fields/properties of the page, eg:
 [page.parent.url]
@@ -10,6 +10,8 @@ Specifiy fields/properties of the page, eg:
 
 You can also define a str_replace to be performed on the returned value, eg: [page.name.(-|_)]
 which will return the page name with the dashes replaced with underscores
+
+You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
 
 
 ####Support forum:

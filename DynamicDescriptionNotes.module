@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Lets you use the PW page variable in field descriptions and notes
+* Lets you insert PW variables and Hanna codes in Description and Note fields.
 *
 * Specifiy fields/properties of the page, eg:
 * [page.parent.url]
@@ -16,13 +16,13 @@
 *
 */
 
-class DescriptionNoteVariables extends WireData implements Module {
+class DynamicDescriptionNotes extends WireData implements Module {
 
     public static function getModuleInfo() {
         return array(
-            'title' => 'Description & Note Variables',
+            'title' => 'Dynamic Description & Notes',
             'version' => 4,
-            'summary' => 'Lets you use page and other PW variables in field Description and Notes text.',
+            'summary' => 'Lets you insert PW variables and Hanna codes in Description and Note fields.',
             'autoload' => "template=admin",
             );
     }
