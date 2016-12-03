@@ -16,19 +16,45 @@
 *
 */
 
-class DynamicDescriptionNotes extends WireData implements Module {
+class DynamicDescriptionNotes extends WireData implements Module, ConfigurableModule {
 
     public static function getModuleInfo() {
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => 4,
+            'version' => 6,
             'summary' => 'Lets you insert PW variables and Hanna codes in Description and Note fields.',
             'autoload' => "template=admin",
             );
     }
 
+    /**
+     * Data as used by the get/set functions
+     *
+     */
+    protected $data = array();
     private $hanna;
     private $p;
+
+   /**
+     * Default configuration for module
+     *
+     */
+    static public function getDefaultData() {
+            return array(
+                "allowHtml" => null
+            );
+    }
+
+    /**
+     * Populate the default config data
+     *
+     */
+    public function __construct() {
+       foreach(self::getDefaultData() as $key => $value) {
+               $this->$key = $value;
+       }
+    }
+
 
     public function init() {
         $this->addHookBefore('Inputfield::render', $this, 'replaceVariables');
@@ -41,7 +67,9 @@ class DynamicDescriptionNotes extends WireData implements Module {
         if(!$this->p) $this->p = $process->getPage();
 
         $inputfield = $event->object;
+        if($this->data['allowHtml']) $inputfield->entityEncodeText = false; // turn of entity encoding so we can have HTML
         $field = $this->fields->get($event->object->name);
+
         $description = $inputfield->description;
         $notes = $inputfield->notes;
         if($description == '' && $notes == '') return;
@@ -60,12 +88,12 @@ class DynamicDescriptionNotes extends WireData implements Module {
     private function variablesReplace($text, $p) {
 
         if(strpos($text, '[page.') === false) return $text;
-
-        preg_match_all('/\[page([^\]]*)\]/', $text, $matches);
-
+        // the "\p{L}age" instead of simply "page" prevents this error in some versions of PHP
+        // Error: preg_match_all(): Compilation failed: unknown property name after \P or \p
+        preg_match_all('/\[\p{L}age([^\]]*)\]/', $text, $matches);
         foreach($matches[1] as $match) {
             $i=0;
-            $properties = array();            
+            $properties = array();
             foreach(explode('.', $match) as $property) {
                 // if property is a defined str_replacement in parentheses set $strReplace
                 if(strpos($property, '(') !== false) {
@@ -92,13 +120,36 @@ class DynamicDescriptionNotes extends WireData implements Module {
     }
 
     private function hannaFormat($text, $p, $field) {
-        if(!$this->hanna) $this->hanna = $this->modules->get('TextformatterHannaCode'); 
+        if(!$this->hanna) $this->hanna = $this->modules->get('TextformatterHannaCode');
         if(strpos($text, $this->hanna->openTag) !== false && strpos($text, $this->hanna->closeTag) !== false) {
             return $this->hanna->render($text, $p, $field);
         }
         else {
             return $text;
         }
+    }
+
+    /**
+     * Return an InputfieldsWrapper of Inputfields used to configure the class
+     *
+     * @param array $data Array of config values indexed by field name
+     * @return InputfieldsWrapper
+     *
+     */
+    public static function getModuleConfigInputfields(array $data) {
+
+        $data = array_merge(self::getDefaultData(), $data);
+
+        $wrapper = new InputfieldWrapper();
+
+        $f = wire('modules')->get("InputfieldCheckbox");
+        $f->attr('name', 'allowHtml');
+        $f->label = __('Allow HTML', __FILE__);
+        $f->description = __('Check this to allow HTML in description and note fields.', __FILE__);
+        $f->attr('checked', $data['allowHtml'] == '1' ? 'checked' : '' );
+        $wrapper->add($f);
+
+        return $wrapper;
     }
 
 }
