@@ -1,5 +1,4 @@
-DynamicDescriptionNotes
-================
+# DynamicDescriptionNotes
 
 ProcessWire module for using PW variables and Hanna codes in Description and Note fields.
 
@@ -14,7 +13,7 @@ which will return the page name with the dashes replaced with underscores
 You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
 
 
-####Support forum:
+#### Support forum:
 
 https://processwire.com/talk/topic/14439-dynamic-description-notes/
 
