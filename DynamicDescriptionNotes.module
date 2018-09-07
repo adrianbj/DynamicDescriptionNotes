@@ -21,8 +21,8 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     public static function getModuleInfo() {
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.0',
-            'summary' => 'Lets you insert PW variables and Hanna codes in Description and Note fields.',
+            'version' => '0.1.1',
+            'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in Description and Note fields.',
             'autoload' => "template=admin",
             );
     }
@@ -82,7 +82,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     private function allReplacements($text, $p, $field) {
         $text = $this->variablesReplace($text, $p);
         if($this->modules->isInstalled('TextformatterHannaCode')) $text = $this->hannaFormat($text, $p, $field);
-        return $this->wire('sanitizer')->entitiesMarkdown($text);
+        return $this->data['allowHtml'] ? $this->wire('sanitizer')->purify($text) : $this->wire('sanitizer')->entitiesMarkdown($text);
     }
 
     private function variablesReplace($text, $p) {
