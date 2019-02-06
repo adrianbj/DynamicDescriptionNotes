@@ -21,7 +21,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     public static function getModuleInfo() {
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.1',
+            'version' => '0.1.2',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in Description and Note fields.',
             'autoload' => "template=admin",
             );
@@ -63,7 +63,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     protected function replaceVariables(HookEvent $event) {
 
         $process = $this->wire('process');
-        if($process->className() !== 'ProcessPageEdit') return;
+        if($process->className() !== 'ProcessPageEdit' && $process->className() !== 'ProcessUser') return;
         if(!$this->p) $this->p = $process->getPage();
 
         $inputfield = $event->object;
