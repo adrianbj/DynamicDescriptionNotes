@@ -1,30 +1,42 @@
 <?php
 
 /**
-* Lets you insert PW variables and Hanna codes in Description and Note fields.
-*
-* Specifiy fields/properties of the page, eg:
-* [page.parent.url]
-* [page.title]
-* [page.template.label]
-*
-* You can also define a str_replace to be performed on the returned value, eg:
-* [page.name.(-|_)]
-* which will return the page name with the dashes replaced with underscores
-*
-* You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
-*
-*/
+ * *
+ * Processwire module for inserting PW variables and Hanna codes in description and note fields.
+ * by Adrian Jones
+ *
+ * ProcessWire 3.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ *
+ * Specifiy fields/properties of the page, eg:
+ * [page.parent.url]
+ * [page.title]
+ * [page.template.label]
+ *
+ * You can also define a str_replace to be performed on the returned value, eg:
+ * [page.name.(-|_)]
+ * which will return the page name with the dashes replaced with underscores
+ *
+ * You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
+ *
+ */
 
 class DynamicDescriptionNotes extends WireData implements Module, ConfigurableModule {
 
     public static function getModuleInfo() {
+
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.2',
-            'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in Description and Note fields.',
+            'version' => '0.1.3',
+            'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
-            );
+        );
+
     }
 
     /**
@@ -40,9 +52,9 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
      *
      */
     static public function getDefaultData() {
-            return array(
-                "allowHtml" => null
-            );
+        return array(
+            "allowHtml" => null
+        );
     }
 
     /**
@@ -50,14 +62,14 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
      *
      */
     public function __construct() {
-       foreach(self::getDefaultData() as $key => $value) {
-               $this->$key = $value;
-       }
+        foreach(self::getDefaultData() as $key => $value) {
+            $this->$key = $value;
+        }
     }
 
 
     public function init() {
-        $this->addHookBefore('Inputfield::render', $this, 'replaceVariables');
+        $this->wire()->addHookBefore('Inputfield::render', $this, 'replaceVariables');
     }
 
     protected function replaceVariables(HookEvent $event) {
@@ -68,7 +80,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         $inputfield = $event->object;
         if($this->data['allowHtml']) $inputfield->entityEncodeText = false; // turn of entity encoding so we can have HTML
-        $field = $this->fields->get($event->object->name);
+        $field = $this->wire('fields')->get($event->object->name);
 
         $description = $inputfield->description;
         $notes = $inputfield->notes;
@@ -80,9 +92,11 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     }
 
     private function allReplacements($text, $p, $field) {
+
         $text = $this->variablesReplace($text, $p);
-        if($this->modules->isInstalled('TextformatterHannaCode')) $text = $this->hannaFormat($text, $p, $field);
+        if($this->wire('modules')->isInstalled('TextformatterHannaCode')) $text = $this->hannaFormat($text, $p, $field);
         return $this->data['allowHtml'] ? $this->wire('sanitizer')->purify($text) : $this->wire('sanitizer')->entitiesMarkdown($text);
+
     }
 
     private function variablesReplace($text, $p) {
@@ -117,16 +131,19 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
             $text = str_replace('[page'.$match.']', $replacement, $text);
         }
         return $text;
+
     }
 
     private function hannaFormat($text, $p, $field) {
-        if(!$this->hanna) $this->hanna = $this->modules->get('TextformatterHannaCode');
+
+        if(!$this->hanna) $this->hanna = $this->wire('modules')->get('TextformatterHannaCode');
         if(strpos($text, $this->hanna->openTag) !== false && strpos($text, $this->hanna->closeTag) !== false) {
             return $this->hanna->render($text, $p, $field);
         }
         else {
             return $text;
         }
+
     }
 
     /**
