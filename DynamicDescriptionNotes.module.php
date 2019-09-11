@@ -2,7 +2,7 @@
 
 /**
  * *
- * Processwire module for inserting PW variables and Hanna codes in description and note fields.
+ * Processwire module for inserting PW variables, Hanna codes, and HTML in description and note fields.
  * by Adrian Jones
  *
  * ProcessWire 3.x
@@ -32,7 +32,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.3',
+            'version' => '0.1.4',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -79,8 +79,9 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
         if(!$this->p) $this->p = $process->getPage();
 
         $inputfield = $event->object;
+        $field = $this->wire('fields')->get($inputfield->name);
+        if(!$field) return;
         if($this->data['allowHtml']) $inputfield->entityEncodeText = false; // turn of entity encoding so we can have HTML
-        $field = $this->wire('fields')->get($event->object->name);
 
         $description = $inputfield->description;
         $notes = $inputfield->notes;
@@ -102,7 +103,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
     private function variablesReplace($text, $p) {
 
         if(strpos($text, '[page.') === false) return $text;
-        // the "\p{L}age" instead of simply "page" prevents this error in some versions of PHP
+        // the "\p{L}age" instead of simply "page" prevents the following error in some versions of PHP
         // Error: preg_match_all(): Compilation failed: unknown property name after \P or \p
         preg_match_all('/\[\p{L}age([^\]]*)\]/', $text, $matches);
         foreach($matches[1] as $match) {
