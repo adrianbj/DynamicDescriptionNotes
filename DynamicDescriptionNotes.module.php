@@ -32,7 +32,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.4',
+            'version' => '0.1.5',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -80,7 +80,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         $inputfield = $event->object;
         $field = $this->wire('fields')->get($inputfield->name);
-        if(!$field) return;
+        if($inputfield->name == 'status') return;
         if($this->data['allowHtml']) $inputfield->entityEncodeText = false; // turn of entity encoding so we can have HTML
 
         $description = $inputfield->description;
