@@ -1,0 +1,32 @@
+{
+    "name": "adrianbj/dynamic-description-notes",
+    "type": "pw-module",
+    "description": "Processwire module for inserting PW variables, Hanna codes, and HTML in description and note fields.",
+    "homepage": "https://github.com/adrianbj/DynamicDescriptionNotes",
+    "support": {
+        "issues": "https://github.com/adrianbj/DynamicDescriptionNotesissues",
+        "source": "https://github.com/adrianbj/DynamicDescriptionNotes",
+        "rss": "https://github.com/adrianbj/DynamicDescriptionNotes/releases.atom",
+        "forum": "https://processwire.com/talk/topic/14439-dynamic-description-notes/"
+    },
+    "keywords": [
+        "module",
+        "processwire",
+        "fields",
+        "description",
+        "notes"
+    ],
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Adrian Jones",
+            "homepage": "https://github.com/adrianbj",
+            "email": "adrianbjones@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.4",
+        "wireframe-framework/processwire-composer-installer": "^1.0.0"
+    }
+}

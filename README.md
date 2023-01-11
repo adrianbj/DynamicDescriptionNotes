@@ -10,6 +10,8 @@ Specifiy fields/properties of the page, eg:
 You can also define a str_replace to be performed on the returned value, eg: [page.name.(-|_)]
 which will return the page name with the dashes replaced with underscores
 
+An option to allow raw HTML is available
+
 You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
 
 

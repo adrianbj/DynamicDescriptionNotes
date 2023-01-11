@@ -5,7 +5,7 @@
  * Processwire module for inserting PW variables, Hanna codes, and HTML in description and note fields.
  * by Adrian Jones
  *
- * Copyright (C) 2021 by Adrian Jones
+ * Copyright (C) 2023 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  *
@@ -14,8 +14,7 @@
  * [page.title]
  * [page.template.label]
  *
- * You can also define a str_replace to be performed on the returned value, eg:
- * [page.name.(-|_)]
+ * You can also define a str_replace to be performed on the returned value, eg: [page.name.(-|_)]
  * which will return the page name with the dashes replaced with underscores
  *
  * You can also use hanna codes within your description and notes fields - big thanks to @Robin S for this idea
@@ -28,7 +27,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.7',
+            'version' => '0.1.8',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -65,7 +64,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
 
     public function init() {
-        $this->wire()->addHookBefore('Inputfield::render', $this, 'replaceVariables');
+        $this->wire()->addHookBefore('Inputfield::renderReadyHook', $this, 'replaceVariables');
     }
 
     protected function replaceVariables(HookEvent $event) {
@@ -131,8 +130,9 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
                 }
                 $i++;
             }
+
             // get the value of the defined PW page properties
-            $replacement = eval('return $p->' . implode('->', $properties) . ';');
+            $replacement = $p->get(implode('.', $properties));
 
             // defined $strReplace changes to the value of the PW page property
             if(isset($strReplace)) {
