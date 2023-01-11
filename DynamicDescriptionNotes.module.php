@@ -28,7 +28,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.6',
+            'version' => '0.1.7',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -92,7 +92,21 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         $text = $this->variablesReplace($text, $p);
         if($this->wire('modules')->isInstalled('TextformatterHannaCode')) $text = $this->hannaFormat($text, $p, $field);
-        return $this->data['allowHtml'] ? $this->wire('sanitizer')->purify($text) : $this->wire('sanitizer')->entitiesMarkdown($text);
+
+        if($this->data['allowHtml']) {
+
+            $text = $this->wire('sanitizer')->purify($text);
+
+            // basic markdown formatting
+            $linkMarkup = str_replace(array('{url}', '{text}'), array('$2', '$1'), '<a href="{url}" rel="noopener noreferrer nofollow" target="_blank">{text}</a>');
+            $text = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', $linkMarkup, $text);
+            $text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $text);
+            $text = preg_replace('/\*([^*\n]+)\*/', '<em>$1</em>', $text);
+            $text = preg_replace('/`+([^`]+)`+/', '<code>$1</code>', $text);
+            $text = preg_replace('/~~(.+?)~~/', '<s>$1</s>', $text);
+        }
+
+        return $text;
 
     }
 
