@@ -27,7 +27,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.8',
+            'version' => '0.1.9',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -139,7 +139,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
                 $parts = explode('|', $strReplace[1][0]);
                 $replacement = str_replace($parts[0], $parts[1], $replacement);
             }
-            $text = str_replace('[page'.$match.']', $replacement, $text);
+            if($replacement) $text = str_replace('[page'.$match.']', $replacement, $text);
         }
         return $text;
 
