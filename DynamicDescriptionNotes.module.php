@@ -80,10 +80,12 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         $description = $inputfield->description;
         $notes = $inputfield->notes;
-        if($description == '' && $notes == '') return;
+        $detail = $inputfield->detail;
+        if($description == '' && $notes == ''&& $detail == '') return;
 
         if($description !== '') $inputfield->description = $this->allReplacements($description, $this->p, $field);
         if($notes !== '') $inputfield->notes  = $this->allReplacements($notes, $this->p, $field);
+        if($detail !== '') $inputfield->detail  = $this->allReplacements($detail, $this->p, $field);
 
     }
 
