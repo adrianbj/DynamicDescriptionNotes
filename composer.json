@@ -1,7 +1,7 @@
 {
     "name": "adrianbj/dynamic-description-notes",
     "type": "pw-module",
-    "description": "Processwire module for inserting PW variables, Hanna codes, and HTML in description and note fields.",
+    "description": "Processwire module for inserting PW variables, Hanna codes, and HTML in description, note, and detail fields.",
     "homepage": "https://github.com/adrianbj/DynamicDescriptionNotes",
     "support": {
         "issues": "https://github.com/adrianbj/DynamicDescriptionNotesissues",
