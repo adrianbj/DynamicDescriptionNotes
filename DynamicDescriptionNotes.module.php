@@ -2,10 +2,10 @@
 
 /**
  * *
- * Processwire module for inserting PW variables, Hanna codes, and HTML in description and note fields.
+ * Processwire module for inserting PW variables, Hanna codes, and HTML in description, note, and detail fields.
  * by Adrian Jones
  *
- * Copyright (C) 2023 by Adrian Jones
+ * Copyright (C) 2024 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  *
@@ -27,7 +27,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
 
         return array(
             'title' => 'Dynamic Description & Notes',
-            'version' => '0.1.9',
+            'version' => '0.1.10',
             'summary' => 'Lets you insert PW variables, HTML, and Hanna codes in description and note fields.',
             'autoload' => "template=admin",
         );
@@ -81,7 +81,7 @@ class DynamicDescriptionNotes extends WireData implements Module, ConfigurableMo
         $description = $inputfield->description;
         $notes = $inputfield->notes;
         $detail = $inputfield->detail;
-        if($description == '' && $notes == ''&& $detail == '') return;
+        if($description == '' && $notes == '' && $detail == '') return;
 
         if($description !== '') $inputfield->description = $this->allReplacements($description, $this->p, $field);
         if($notes !== '') $inputfield->notes  = $this->allReplacements($notes, $this->p, $field);
